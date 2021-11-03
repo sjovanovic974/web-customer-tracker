@@ -10,4 +10,10 @@ public interface CustomerDAO {
 	public void saveCustomer(Customer theCustomer);
 
 	public Customer getCustomer(int id);
+
+	public void deleteCustomer(int id);
+
+	public List<Customer> searchCustomers(String theSearchName);
+
+	public List<Customer> getCustomers(int theSortField);
 }

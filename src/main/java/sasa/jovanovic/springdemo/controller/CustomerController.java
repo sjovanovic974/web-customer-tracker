@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import sasa.jovanovic.springdemo.entity.Customer;
 import sasa.jovanovic.springdemo.service.CustomerService;
+import sasa.jovanovic.springdemo.util.SortUtils;
 
 @Controller
 @RequestMapping("/customer")
@@ -23,15 +24,24 @@ public class CustomerController {
 	private CustomerService customerService;
 
 	@GetMapping("/list")
-	public String listCustomers(Model theModel) {
+	public String listCustomers(Model theModel, @RequestParam(required = false) String sort) {
 
 		// get customers from the service
-		List<Customer> customers = customerService.getCustomers();
+		List<Customer> customers = null;
+		
+		// check for the sort field
+		if(sort != null) {
+			int theSortField = Integer.parseInt(sort);
+			customers = customerService.getCustomers(theSortField);
+		} else {
+			// no sort field provided... default to string by last name
+			customers = customerService.getCustomers(SortUtils.LAST_NAME);
+		}
 
 		// add the customers to the model
 		theModel.addAttribute("customers", customers);
 
-		return "list-customers";
+		return "list-customers"; 
 	}
 	
 	@GetMapping("/show-form-for-add")
@@ -65,5 +75,26 @@ public class CustomerController {
 		// send over to our form
 		return "customer-form";
 	}
-
+	
+	@GetMapping("/delete")
+	public String deleteCustomer(@RequestParam("customerId") int id) {
+		
+		// delete the customer
+		customerService.deleteCustomer(id);
+		
+		// send over to our form
+		return "redirect:/customer/list";
+	}
+	
+	@GetMapping("/search")
+	public String searchCustomers(@RequestParam("theSearchName") String theSearchName, Model theModel) {
+		
+		// search customers from the service
+		List<Customer> theCustomers = customerService.searchCustomers(theSearchName);
+		
+		// add the customers to the model
+		theModel.addAttribute("customers", theCustomers);
+		
+		return "list-customers";
+	}
 }
